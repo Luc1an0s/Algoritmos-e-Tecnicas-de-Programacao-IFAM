@@ -8,15 +8,15 @@ int main (){
     int num1, num2;
     float divisao;
 
-    printf("Digite o primeiro n√∫mero: ");
+    printf("Digite o primeiro n˙mero: ");
     scanf("%d", &num1);
-    printf("Digite o segundo n√∫mero: ");
+    printf("Digite o segundo n˙mero: ");
     scanf("%d", &num2);
     if (num2 != 0) {
-        divisao = (float)num1 / num2;  // n√£o sei se pode fazer convers√£o for√ßada, mas √© necess√°rio para obter o resultado com casas decimais!!
-        printf("A divis√£o dos n√∫meros √©: %.2f\n", divisao);
+        divisao = (float)num1 / num2;  // n„o sei se pode fazer convers„o forÁada, mas È necess·rio para obter o resultado com casas decimais!!
+        printf("A divis„o dos n˙meros È: %.2f\n", divisao);
     } else {
-        printf("Erro: Divis√£o por zero n√£o √© permitida.\n");
+        printf("Erro: Divis„o por zero n„o È permitida.\n");
     }
     return 0;
 }
