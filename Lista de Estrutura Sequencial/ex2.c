@@ -7,11 +7,11 @@ int main (){
 
     float num1, num2, subtracao;
 
-    printf("Digite o primeiro nÃºmero: ");
+    printf("Digite o primeiro número: ");
     scanf("%f", &num1);
-    printf("Digite o segundo nÃºmero: ");
+    printf("Digite o segundo número: ");
     scanf("%f", &num2);
     subtracao = num1 - num2;
-    printf("A subtraÃ§Ã£o dos nÃºmeros sÃ£o: %.2f\n", subtracao);
+    printf("A subtração dos números são: %.2f\n", subtracao);
     return 0;
 }
