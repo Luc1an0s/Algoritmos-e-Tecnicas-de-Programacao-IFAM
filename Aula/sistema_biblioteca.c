@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <locale.h>
 #ifdef _WIN32
 #include <windows.h>
@@ -74,8 +73,8 @@ void lerTexto(char *, int);
 int lerInteiro(char []);
 const char* categoriaParaTexto(CategoriaLivro);
 const char* situacaoParaTexto(SituacaoLivro);
-int encontrarLivroPorId(int, Livro [], int);
-int encontrarUsuarioPorId(int, Usuario [], int);
+int encontrarLivroPorId(Livro [], int, int);
+int encontrarUsuarioPorId(Usuario [], int, int);
 void pausarTela();
 void cadastrarLivro(Livro [], int *, int*);
 void listarLivros(Livro [], int);
@@ -85,7 +84,7 @@ void buscarLivroPorCategoria(Livro [], int);
 void atualizarLivro(Livro [], int);
 void removerLivro(Livro [], int);
 void cadastrarUsuario(Usuario [], int *, int*);
-void listarUsuarios(Usuario [], int);
+void listarUsuarios(Usuario [], int *);
 void buscarUsuarioPorNome(Usuario [], int);
 void atualizarUsuario(Usuario [], int);
 void removerUsuario(Usuario [], int);
@@ -97,8 +96,38 @@ void menuUsuarios(Usuario [], int *, int *);
 void menuEmprestimos(Livro [], int, Usuario [], int);
 void limparTela();
 void removerQuebraLinha(char []);
+void configurarConsole();
 
-int main() {}
+int main() {
+    configurarConsole();
+
+    Livro acervo[MAX_LIVROS];
+    Usuario usuarios[MAX_USUARIOS];
+
+    int totalLivros = 0, proximoIdLivro = 1;
+    int totalUsuarios = 0, proximoIdUsuario = 1;
+    int op;
+
+    do {
+        limparTela();
+        printf("\n%s=== SISTEMA DE BIBLIOTECA ===%s\n", CIANO, RESET);
+        printf("1. Módulo de Livros\n2. Módulo de Usuários\n3. Módulo de Empréstimos\n0. Sair\n");
+        op = lerInteiro("Opção: ");
+
+        switch (op) {
+            case 1: menuLivros(acervo, &totalLivros, &proximoIdLivro); break;
+            case 2: menuUsuarios(usuarios, &totalUsuarios, &proximoIdUsuario); break;
+            case 3: menuEmprestimos(acervo, totalLivros, usuarios, totalUsuarios); break;
+            case 0: printf("%sSistema encerrado.%s\n", VERDE, RESET); break;
+            default:
+                printf("%sOpção inválida!%s\n", VERMELHO, RESET);
+                pausarTela();
+                break;
+        }
+    } while (op != 0);
+
+    return 0;
+}
 
 void configurarConsole() {
     setlocale(LC_ALL, "Portuguese_Brazil.UTF-8");
@@ -161,7 +190,7 @@ const char* situacaoParaTexto(SituacaoLivro sit) {
     }
 }
 
-CategoriaLivro escolherCategoriaLivro(Livro [], int tam) {
+CategoriaLivro escolherCategoriaLivro() {
     int opcao;
     printf("%s%s%s", AMARELO, RESET);
     printf("\n%s1 - Ficção\n%s2 - Não-Ficção\n%s3 - Ciência%s\n", VERDE, VERDE, VERDE, RESET);
@@ -308,7 +337,7 @@ void removerLivro(Livro acervo[], int tam) {
     printf("%sLivro removido (logicamente).%s\n", VERDE, RESET);
 }
 
-void menuLivros(Livro acervo[], int *total, int *proximoId) {
+void menuLivros(Livro acervo[], int *tam, int *proximoId) {
     int op;
     do {
         limparTela();
@@ -319,13 +348,184 @@ void menuLivros(Livro acervo[], int *total, int *proximoId) {
         op = lerInteiro("Opção: ");
 
         switch(op) {
-            case 1: cadastrarLivro(acervo, total, proximoId); break;
-            case 2: listarLivros(acervo, *total); break;
-            case 3: listarLivrosDisponiveis(acervo, *total); break;
-            case 4: buscarLivroPorTitulo(acervo, *total); break;
-            case 5: buscarLivroPorCategoria(acervo, *total); break;
-            case 6: atualizarLivro(acervo, *total); break;
-            case 7: removerLivro(acervo, *total); break;
+            case 1: cadastrarLivro(acervo, tam, proximoId); break;
+            case 2: listarLivros(acervo, *tam); break;
+            case 3: listarLivrosDisponiveis(acervo, *tam); break;
+            case 4: buscarLivroPorTitulo(acervo, *tam); break;
+            case 5: buscarLivroPorCategoria(acervo, *tam); break;
+            case 6: atualizarLivro(acervo, *tam); break;
+            case 7: removerLivro(acervo, *tam); break;
+            case 0: break;
+            default: printf("%sOpção inválida.%s\n", VERMELHO, RESET);
+        }
+        if (op != 0) pausarTela();
+    } while (op != 0);
+}
+
+void cadastrarUsuario(Usuario usuarios[], int *tam, int *proximoId) {
+    Usuario novo;
+    novo.id = (*proximoId)++;
+    novo.ativo = 1;
+    novo.livroEmprestadoId = 0;
+
+    printf("\nNome: ");
+    lerTexto(novo.nome, TAM_NOME);
+    printf("CPF: ");
+    lerTexto(novo.cpf, TAM_CPF);
+    printf("E-mail: ");
+    lerTexto(novo.email, TAM_EMAIL);
+
+    usuarios[*tam] = novo;
+    (*tam)++;
+    printf("%sUsuário cadastrado com sucesso! ID: %d%s\n", VERDE, novo.id, RESET);
+}
+
+void listarUsuarios(Usuario usuarios[], int *tam) {
+    int encontrou = 0;
+    printf("\n%s--- Lista de Usuários ---%s\n", CIANO, RESET);
+    for (int i = 0; i < tam; i++) {
+        if (usuarios[i].ativo == 1) {
+            printf("ID: %d | Nome: %s | Empréstimo Ativo: %d\n",
+                   usuarios[i].id, usuarios[i].nome, usuarios[i].livroEmprestadoId);
+            encontrou = 1;
+        }
+    }
+    if (!encontrou) printf("%sUsuário não encontrado.%s\n", VERMELHO, RESET);
+}
+
+void buscarUsuarioPorNome(Usuario usuarios[], int tam) {
+    char busca[TAM_NOME];
+    int encontrou = 0;
+    printf("\nDigite parte do nome: ");
+    lerTexto(busca, TAM_NOME);
+
+    for (int i = 0; i < tam; i++) {
+        if (usuarios[i].ativo && strstr(usuarios[i].nome, busca) != NULL) {
+            printf("ID: %d | Nome: %s | Email: %s\n", usuarios[i].id, usuarios[i].nome, usuarios[i].email);
+            encontrou = 1;
+        }
+    }
+    if (!encontrou) printf("%sUsuário não encontrado.%s\n", VERMELHO, RESET);
+}
+
+void atualizarUsuario(Usuario usuarios[], int tam) {
+    int id = lerInteiro("Digite o ID do usuário para atualizar: ");
+    int idx = encontrarUsuarioPorId(usuarios, tam, id);
+    if (idx == -1) {
+        printf("%sUsuário não encontrado.%s\n", VERMELHO, RESET);
+        return;
+    }
+    printf("Novo Nome (Atual: %s): ", usuarios[idx].nome);
+    lerTexto(usuarios[idx].nome, TAM_NOME);
+    printf("%sUsuário atualizado.%s\n", VERDE, RESET);
+}
+
+void removerUsuario(Usuario usuarios[], int tam) {
+    int id = lerInteiro("Digite o ID do usuário a ser removido: ");
+    int idx = encontrarUsuarioPorId(usuarios, tam, id);
+    if (idx == -1) {
+        printf("%sUsuário não encontrado.%s\n", VERMELHO, RESET);
+        return;
+    }
+    if (usuarios[idx].livroEmprestadoId != 0) {
+        printf("%sO usuário possui empréstimo pendente.%s\n", VERMELHO, RESET);
+        return;
+    }
+    usuarios[idx].ativo = 0;
+    printf("%sUsuário removido.%s\n", VERDE, RESET);
+}
+
+void menuUsuarios(Usuario usuarios[], int *tam, int *proximoId) {
+    int op;
+    do {
+        limparTela();
+        printf("\n%s=== MÓDULO DE USUÁRIOS ===%s\n", CIANO, RESET);
+        printf("1. Cadastrar Usuário\n2. Listar Usuários\n3. Buscar Usuário\n");
+        printf("4. Atualizar Usuário\n5. Remover Usuário\n0. Voltar\n");
+        op = lerInteiro("Opção: ");
+
+        switch(op) {
+            case 1: cadastrarUsuario(usuarios, tam, proximoId); break;
+            case 2: listarUsuarios(usuarios, *tam); break;
+            case 3: buscarUsuarioPorNome(usuarios, *tam); break;
+            case 4: atualizarUsuario(usuarios, *tam); break;
+            case 5: removerUsuario(usuarios, *tam); break;
+            case 0: break;
+            default: printf("%sOpção inválida.%s\n", VERMELHO, RESET);
+        }
+        if (op != 0) pausarTela();
+    } while (op != 0);
+}
+
+void registrarEmprestimo(Livro acervo[], int tLivros, Usuario usuarios[], int tUsuarios) {
+    int idUser = lerInteiro("ID do Usuário: ");
+    int idxUser = encontrarUsuarioPorId(usuarios, tUsuarios, idUser);
+    if (idxUser == -1) {
+        printf("%sUsuário não encontrado.%s\n", VERMELHO, RESET);
+        return;
+    }
+    if (usuarios[idxUser].livroEmprestadoId != 0) {
+        printf("%sUsuário já possui um empréstimo ativo.%s\n", VERMELHO, RESET);
+        return;
+    }
+
+    int idLivro = lerInteiro("ID do Livro: ");
+    int idxLivro = encontrarLivroPorId(acervo, tLivros, idLivro);
+    if (idxLivro == -1 || acervo[idxLivro].situacao != DISPONIVEL) {
+        printf("%sLivro indisponível ou não encontrado.%s\n", VERMELHO, RESET);
+        return;
+    }
+
+    usuarios[idxUser].livroEmprestadoId = acervo[idxLivro].id;
+    acervo[idxLivro].situacao = EMPRESTADO;
+    printf("%sEmpréstimo realizado com sucesso!%s\n", VERDE, RESET);
+}
+
+void registrarDevolucao(Livro acervo[], int tLivros, Usuario usuarios[], int tUsuarios) {
+    int idUser = lerInteiro("ID do Usuário devolvendo o livro: ");
+    int idxUser = encontrarUsuarioPorId(usuarios, tUsuarios, idUser);
+
+    if (idxUser == -1 || usuarios[idxUser].livroEmprestadoId == 0) {
+        printf("%sUsuário não encontrado ou sem empréstimos.%s\n", VERMELHO, RESET);
+        return;
+    }
+
+    int idxLivro = encontrarLivroPorId(acervo, tLivros, usuarios[idxUser].livroEmprestadoId);
+
+    usuarios[idxUser].livroEmprestadoId = 0;
+    if (idxLivro != -1) {
+        acervo[idxLivro].situacao = DISPONIVEL;
+    }
+    printf("%sDevolução concluída.%s\n", VERDE, RESET);
+}
+
+void listarEmprestimos(Livro acervo[], int tLivros, Usuario usuarios[], int tUsuarios) {
+    int encontrou = 0;
+    printf("\n%s--- Empréstimos Ativos ---%s\n", CIANO, RESET);
+    for (int i = 0; i < tUsuarios; i++) {
+        if (usuarios[i].ativo && usuarios[i].livroEmprestadoId != 0) {
+            int idxLivro = encontrarLivroPorId(acervo, tLivros, usuarios[i].livroEmprestadoId);
+            if (idxLivro != -1) {
+                printf("Usuário: %s | Livro: %s\n", usuarios[i].nome, acervo[idxLivro].titulo);
+                encontrou = 1;
+            }
+        }
+    }
+    if (!encontrou) printf("%sNenhum empréstimo ativo.%s\n", VERMELHO, RESET);
+}
+
+void menuEmprestimos(Livro acervo[], int tLivros, Usuario usuarios[], int tUsuarios) {
+    int op;
+    do {
+        limparTela();
+        printf("\n%s=== MÓDULO DE EMPRÉSTIMOS ===%s\n", CIANO, RESET);
+        printf("1. Registrar Empréstimo\n2. Registrar Devolução\n3. Listar Empréstimos\n0. Voltar\n");
+        op = lerInteiro("Opção: ");
+
+        switch(op) {
+            case 1: registrarEmprestimo(acervo, tLivros, usuarios, tUsuarios); break;
+            case 2: registrarDevolucao(acervo, tLivros, usuarios, tUsuarios); break;
+            case 3: listarEmprestimos(acervo, tLivros, usuarios, tUsuarios); break;
             case 0: break;
             default: printf("%sOpção inválida.%s\n", VERMELHO, RESET);
         }
