@@ -1,3 +1,6 @@
-//
-// Created by User on 23/05/2026.
-//
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+int main() {}
