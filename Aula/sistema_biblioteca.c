@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#include <locale.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 //definição de constantes
 #define MAX_LIVROS 200
 #define MAX_USUARIOS 100
@@ -92,14 +95,30 @@ void listarEmprestimos(Livro [], int, Usuario [], int);
 void menuLivros(Livro [], int *, int *);
 void menuUsuarios(Usuario [], int *, int *);
 void menuEmprestimos(Livro [], int, Usuario [], int);
-
+void limparTela();
+void removerQuebraLinha(char []);
 
 int main() {}
 
+void configurarConsole() {
+    setlocale(LC_ALL, "Portuguese_Brazil.UTF-8");
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
+}
+
+void limparTela() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
 //funçao auxiliar para ler texto
 void lerTexto(char *texto, int tam) {
     fgets(texto, tam, stdin);
-    texto[strcspn(texto, "\n")] = '\0';
+    removerQuebraLinha(texto);
 }
 
 //funçao para ler inteiro
@@ -110,4 +129,206 @@ int lerInteiro(char mensagem[]) {
     getchar();
 
     return valor;
+}
+
+void pausarTela() {
+    printf("\n%sPressione ENTER para continuar...%s",AMARELO, RESET);
+    getchar();
+}
+
+void removerQuebraLinha(char texto[]) {
+    texto[strcspn(texto, "\n")] = '\0';
+}
+
+const char* categoriaParaTexto(CategoriaLivro cat) {
+    switch (cat) {
+        case FICCAO: return "Ficção";
+        case NAOFICCAO: return "Não-Ficção";
+        case CIENCIA: return "Ciência";
+        case HISTORIA: return "História";
+        case TECNOLOGIA: return "Tecnologia";
+        case ARTE: return "Arte";
+        default: return "Desconhecida";
+    }
+}
+
+const char* situacaoParaTexto(SituacaoLivro sit) {
+    switch (sit) {
+        case DISPONIVEL: return "DISPONIVEL";
+        case EMPRESTADO: return "EMPRESTADO";
+        case RESERVADO : return "RESERVADO";
+        default: return "Desconhecida";
+    }
+}
+
+CategoriaLivro escolherCategoriaLivro(Livro [], int tam) {
+    int opcao;
+    printf("%s%s%s", AMARELO, RESET);
+    printf("\n%s1 - Ficção\n%s2 - Não-Ficção\n%s3 - Ciência%s\n", VERDE, VERDE, VERDE, RESET);
+    printf("%s4 - História\n%s5 - Tecnologia\n%s6 - Arte%s\n", VERDE, VERDE, VERDE, RESET);
+
+    do {
+        opcao = lerInteiro("Escolha a categoria (1-6): ");
+        if (opcao < 1 || opcao > 6) {
+            printf("%sOpção inválida. Tente novamente.%s\n", VERMELHO, RESET);
+        }
+    } while (opcao < 1 || opcao > 6);
+
+    return (CategoriaLivro) opcao;
+    }
+
+int encontrarLivroPorId(Livro acervo[], int tam, int id) {
+    for (int i = 0; i < tam; i++) {
+        if (acervo[i].id == id && acervo[i].ativo == 1) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int encontrarUsuarioPorId(Usuario usuarios[], int tam, int id) {
+    for (int i = 0; i < tam; i++) {
+        if (usuarios[i].id == id && usuarios[i].ativo == 1) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void cadastrarLivro(Livro acervo[], int *tam, int *proximoId) {
+    Livro novo;
+    novo.id = (*proximoId)++;
+    novo.ativo = 1;
+    novo.situacao = DISPONIVEL;
+
+    printf("\n%s--- Cadastrar Livro ---%s\n", CIANO, RESET);
+
+    printf("Título: ");
+    lerTexto(novo.titulo, TAM_TITULO);
+
+    printf("ISBN: ");
+    lerTexto(novo.isbn, TAM_ISBN);
+
+    novo.anoPublicacao = lerInteiro("Ano de Publicação: ");
+
+    printf("Nome do Autor: ");
+    lerTexto(novo.autor.nome, TAM_AUTOR);
+
+    printf("Nacionalidade do Autor: ");
+    lerTexto(novo.autor.nacionalidade, 50);
+
+    novo.autor.anoNascimento = lerInteiro("Ano de Nascimento do Autor: ");
+    novo.categoria = escolherCategoriaLivro();
+
+    acervo[*tam] = novo;
+    (*tam)++;
+
+    printf("%sLivro cadastrado com sucesso! ID: %d%s\n", VERDE, novo.id, RESET);
+}
+
+void listarLivros(Livro acervo[], int tam) {
+    int encontrou = 0;
+    printf("\n%s--- Acervo Completo ---%s\n", CIANO, RESET);
+    for (int i = 0; i < tam; i++) {
+        if (acervo[i].ativo == 1) {
+            printf("ID: %d | Título: %s | Autor: %s | Categoria: %s | Situação: %s\n",
+                   acervo[i].id, acervo[i].titulo, acervo[i].autor.nome,
+                   categoriaParaTexto(acervo[i].categoria), situacaoParaTexto(acervo[i].situacao));
+            encontrou = 1;
+        }
+    }
+    if (!encontrou) printf("%sNenhum livro cadastrado.%s\n", VERMELHO, RESET);
+}
+
+void listarLivrosDisponiveis(Livro acervo[], int tam) {
+    int encontrou = 0;
+    printf("\n%s--- Livros Disponíveis ---%s\n", CIANO, RESET);
+    for (int i = 0; i < tam; i++) {
+        if (acervo[i].ativo == 1 && acervo[i].situacao == DISPONIVEL) {
+            printf("ID: %d | Título: %s | Autor: %s\n", acervo[i].id, acervo[i].titulo, acervo[i].autor.nome);
+            encontrou = 1;
+        }
+    }
+    if (!encontrou) printf("%sNenhum livro disponível.%s\n", VERMELHO, RESET);
+}
+
+void buscarLivroPorTitulo(Livro acervo[], int tam) {
+    char busca[TAM_TITULO];
+    int encontrou = 0;
+    printf("\nDigite parte do título: ");
+    lerTexto(busca, TAM_TITULO);
+
+    printf("\n%s--- Resultados da Busca ---%s\n", CIANO, RESET);
+    for (int i = 0; i < tam; i++) {
+        if (acervo[i].ativo == 1 && strstr(acervo[i].titulo, busca) != NULL) {
+            printf("ID: %d | Título: %s | Situação: %s\n", acervo[i].id, acervo[i].titulo, situacaoParaTexto(acervo[i].situacao));
+            encontrou = 1;
+        }
+    }
+    if (!encontrou) printf("%sLivro não encontrado.%s\n", VERMELHO, RESET);
+}
+
+void buscarLivroPorCategoria(Livro acervo[], int tam) {
+    CategoriaLivro cat = escolherCategoriaLivro();
+    int encontrou = 0;
+    printf("\n%s--- Livros na Categoria ---%s\n", CIANO, RESET);
+    for (int i = 0; i < tam; i++) {
+        if (acervo[i].ativo == 1 && acervo[i].categoria == cat) {
+            printf("ID: %d | Título: %s | Autor: %s\n", acervo[i].id, acervo[i].titulo, acervo[i].autor.nome);
+            encontrou = 1;
+        }
+    }
+    if (!encontrou) printf("%sNenhum livro nesta categoria.%s\n", VERMELHO, RESET);
+}
+
+void atualizarLivro(Livro acervo[], int tam) {
+    int id = lerInteiro("Digite o ID do livro para atualizar: ");
+    int idx = encontrarLivroPorId(acervo, tam, id);
+    if (idx == -1) {
+        printf("%sLivro não encontrado.%s\n", VERMELHO, RESET);
+        return;
+    }
+    printf("Novo Título (Atual: %s): ", acervo[idx].titulo);
+    lerTexto(acervo[idx].titulo, TAM_TITULO);
+    printf("%sLivro atualizado.%s\n", VERDE, RESET);
+}
+
+void removerLivro(Livro acervo[], int tam) {
+    int id = lerInteiro("Digite o ID do livro a ser removido: ");
+    int j = encontrarLivroPorId(acervo, tam, id);
+    if (j == -1) {
+        printf("%sLivro não encontrado.%s\n", VERMELHO, RESET);
+        return;
+    }
+    if (acervo[j].situacao == EMPRESTADO) {
+        printf("%sNão é possível remover livro emprestado.%s\n", VERMELHO, RESET);
+        return;
+    }
+    acervo[j].ativo = 0;
+    printf("%sLivro removido (logicamente).%s\n", VERDE, RESET);
+}
+
+void menuLivros(Livro acervo[], int *total, int *proximoId) {
+    int op;
+    do {
+        limparTela();
+        printf("\n%s=== MÓDULO DE LIVROS ===%s\n", CIANO, RESET);
+        printf("1. Cadastrar Livro\n2. Listar Livros\n3. Listar Disponíveis\n");
+        printf("4. Buscar por Título\n5. Buscar por Categoria\n");
+        printf("6. Atualizar Livro\n7. Remover Livro\n0. Voltar\n");
+        op = lerInteiro("Opção: ");
+
+        switch(op) {
+            case 1: cadastrarLivro(acervo, total, proximoId); break;
+            case 2: listarLivros(acervo, *total); break;
+            case 3: listarLivrosDisponiveis(acervo, *total); break;
+            case 4: buscarLivroPorTitulo(acervo, *total); break;
+            case 5: buscarLivroPorCategoria(acervo, *total); break;
+            case 6: atualizarLivro(acervo, *total); break;
+            case 7: removerLivro(acervo, *total); break;
+            case 0: break;
+            default: printf("%sOpção inválida.%s\n", VERMELHO, RESET);
+        }
+        if (op != 0) pausarTela();
+    } while (op != 0);
 }
