@@ -68,7 +68,7 @@ typedef struct {
 
 //prototipo das funções
 void lerTexto(char *, int);
-void lerInteiro(int *);
+int lerInteiro(char []);
 const char* categoriaParaTexto(CategoriaLivro);
 const char* situacaoParaTexto(SituacaoLivro);
 int encontrarLivroPorId(int, Livro [], int);
@@ -95,3 +95,19 @@ void menuEmprestimos(Livro [], int, Usuario [], int);
 
 
 int main() {}
+
+//funçao auxiliar para ler texto
+void lerTexto(char *texto, int tam) {
+    fgets(texto, tam, stdin);
+    texto[strcspn(texto, "\n")] = '\0';
+}
+
+//funçao para ler inteiro
+int lerInteiro(char mensagem[]) {
+    int valor;
+    printf("%s%s%s", mensagem, RESET);
+    scanf("%d", &valor);
+    getchar();
+
+    return valor;
+}
