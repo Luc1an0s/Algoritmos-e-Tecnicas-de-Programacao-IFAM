@@ -43,5 +43,17 @@ typedef struct {
     int anoNascimento;
 } DadosAutor;
 
+//struct para dados do livro
+typedef struct {
+    int id;
+    char titulo[TAM_TITULO];
+    DadosAutor autor;
+    char isbn[TAM_ISBN];
+    int anoPublicacao;
+    CategoriaLivro categoria;
+    SituacaoLivro situacao;
+    int ativo;
+} Livro;
+
 
 int main() {}
