@@ -36,5 +36,12 @@ typedef enum {
     RESERVADO
 } SituacaoLivro;
 
+//Struct para dados do autor
+typedef struct {
+    char nome[TAM_AUTOR];
+    char nacionalidade[50];
+    int anoNascimento;
+} DadosAutor;
+
 
 int main() {}
