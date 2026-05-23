@@ -66,5 +66,32 @@ typedef struct {
     int ativo;
 } Usuario;
 
+//prototipo das funções
+void lerTexto(char *, int);
+void lerInteiro(int *);
+const char* categoriaParaTexto(CategoriaLivro);
+const char* situacaoParaTexto(SituacaoLivro);
+int encontrarLivroPorId(int, Livro [], int);
+int encontrarUsuarioPorId(int, Usuario [], int);
+void pausarTela();
+void cadastrarLivro(Livro [], int *, int*);
+void listarLivros(Livro [], int);
+void listarLivrosDisponiveis(Livro [], int);
+void buscarLivroPorTitulo(Livro [], int);
+void buscarLivroPorCategoria(Livro [], int);
+void atualizarLivro(Livro [], int);
+void removerLivro(Livro [], int);
+void cadastrarUsuario(Usuario [], int *, int*);
+void listarUsuarios(Usuario [], int);
+void buscarUsuarioPorNome(Usuario [], int);
+void atualizarUsuario(Usuario [], int);
+void removerUsuario(Usuario [], int);
+void registrarDevolucao(Livro [], int, Usuario [], int);
+void registrarEmprestimo(Livro [], int, Usuario [], int);
+void listarEmprestimos(Livro [], int, Usuario [], int);
+void menuLivros(Livro [], int *, int *);
+void menuUsuarios(Usuario [], int *, int *);
+void menuEmprestimos(Livro [], int, Usuario [], int);
+
 
 int main() {}
