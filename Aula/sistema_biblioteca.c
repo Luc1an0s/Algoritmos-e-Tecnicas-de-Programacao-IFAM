@@ -19,4 +19,22 @@
 #define CIANO "\x1b[35m"
 #define RESET "\x1b[0m"
 
+//Categoria dos livros
+typedef enum {
+    FICCAO = 1,
+    NAOFICCAO,
+    CIENCIA,
+    HISTORIA,
+    TECNOLOGIA,
+    ARTE
+} CategoriaLivro;
+
+//Situação dos livros
+typedef enum {
+    DISPONIVEL = 1,
+    EMPRESTADO,
+    RESERVADO
+} SituacaoLivro;
+
+
 int main() {}
