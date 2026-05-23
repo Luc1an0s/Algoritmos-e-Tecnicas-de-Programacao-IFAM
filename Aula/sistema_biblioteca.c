@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <locale.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
+
 //definição de constantes
 #define MAX_LIVROS 200
 #define MAX_USUARIOS 100
@@ -73,6 +76,7 @@ void lerTexto(char *, int);
 int lerInteiro(char []);
 const char* categoriaParaTexto(CategoriaLivro);
 const char* situacaoParaTexto(SituacaoLivro);
+CategoriaLivro escolherCategoriaLivro();
 int encontrarLivroPorId(Livro [], int, int);
 int encontrarUsuarioPorId(Usuario [], int, int);
 void pausarTela();
@@ -84,7 +88,7 @@ void buscarLivroPorCategoria(Livro [], int);
 void atualizarLivro(Livro [], int);
 void removerLivro(Livro [], int);
 void cadastrarUsuario(Usuario [], int *, int*);
-void listarUsuarios(Usuario [], int *);
+void listarUsuarios(Usuario [], int);
 void buscarUsuarioPorNome(Usuario [], int);
 void atualizarUsuario(Usuario [], int);
 void removerUsuario(Usuario [], int);
@@ -144,6 +148,7 @@ void limparTela() {
     system("clear");
 #endif
 }
+
 //funçao auxiliar para ler texto
 void lerTexto(char *texto, int tam) {
     fgets(texto, tam, stdin);
@@ -153,15 +158,15 @@ void lerTexto(char *texto, int tam) {
 //funçao para ler inteiro
 int lerInteiro(char mensagem[]) {
     int valor;
-    printf("%s%s%s", mensagem, RESET);
-    scanf("%d", &valor);
+    printf("%s%s%s", CIANO, mensagem, RESET);
+    if (scanf("%d", &valor) != 1) valor = -1;
     getchar();
 
     return valor;
 }
 
 void pausarTela() {
-    printf("\n%sPressione ENTER para continuar...%s",AMARELO, RESET);
+    printf("\n%sPressione ENTER para continuar...%s", AMARELO, RESET);
     getchar();
 }
 
@@ -192,7 +197,7 @@ const char* situacaoParaTexto(SituacaoLivro sit) {
 
 CategoriaLivro escolherCategoriaLivro() {
     int opcao;
-    printf("%s%s%s", AMARELO, RESET);
+    printf("%s%s%s", AMARELO, "", RESET);
     printf("\n%s1 - Ficção\n%s2 - Não-Ficção\n%s3 - Ciência%s\n", VERDE, VERDE, VERDE, RESET);
     printf("%s4 - História\n%s5 - Tecnologia\n%s6 - Arte%s\n", VERDE, VERDE, VERDE, RESET);
 
@@ -204,7 +209,7 @@ CategoriaLivro escolherCategoriaLivro() {
     } while (opcao < 1 || opcao > 6);
 
     return (CategoriaLivro) opcao;
-    }
+}
 
 int encontrarLivroPorId(Livro acervo[], int tam, int id) {
     for (int i = 0; i < tam; i++) {
@@ -225,6 +230,11 @@ int encontrarUsuarioPorId(Usuario usuarios[], int tam, int id) {
 }
 
 void cadastrarLivro(Livro acervo[], int *tam, int *proximoId) {
+    if (*tam >= MAX_LIVROS) {
+        printf("%sLimite de livros atingido!%s\n", VERMELHO, RESET);
+        return;
+    }
+
     Livro novo;
     novo.id = (*proximoId)++;
     novo.ativo = 1;
@@ -363,6 +373,11 @@ void menuLivros(Livro acervo[], int *tam, int *proximoId) {
 }
 
 void cadastrarUsuario(Usuario usuarios[], int *tam, int *proximoId) {
+    if (*tam >= MAX_USUARIOS) {
+        printf("%sLimite de usuários atingido!%s\n", VERMELHO, RESET);
+        return;
+    }
+
     Usuario novo;
     novo.id = (*proximoId)++;
     novo.ativo = 1;
@@ -380,7 +395,7 @@ void cadastrarUsuario(Usuario usuarios[], int *tam, int *proximoId) {
     printf("%sUsuário cadastrado com sucesso! ID: %d%s\n", VERDE, novo.id, RESET);
 }
 
-void listarUsuarios(Usuario usuarios[], int *tam) {
+void listarUsuarios(Usuario usuarios[], int tam) {
     int encontrou = 0;
     printf("\n%s--- Lista de Usuários ---%s\n", CIANO, RESET);
     for (int i = 0; i < tam; i++) {
@@ -390,7 +405,7 @@ void listarUsuarios(Usuario usuarios[], int *tam) {
             encontrou = 1;
         }
     }
-    if (!encontrou) printf("%sUsuário não encontrado.%s\n", VERMELHO, RESET);
+    if (!encontrou) printf("%sNenhum usuário cadastrado.%s\n", VERMELHO, RESET);
 }
 
 void buscarUsuarioPorNome(Usuario usuarios[], int tam) {
