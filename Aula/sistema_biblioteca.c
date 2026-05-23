@@ -11,6 +11,7 @@
 #define TAM_ISBN 20
 #define TAM_NOME 80
 #define TAM_CPF 15
+#define TAM_EMAIL 50
 
 //definição de cores
 #define VERDE "\x1b[32m"
@@ -54,6 +55,16 @@ typedef struct {
     SituacaoLivro situacao;
     int ativo;
 } Livro;
+
+//struct para dados do usuario
+typedef struct {
+    int id;
+    char nome[TAM_NOME];
+    char cpf[TAM_CPF];
+    char email[TAM_EMAIL];
+    int livroEmprestadoId;
+    int ativo;
+} Usuario;
 
 
 int main() {}
