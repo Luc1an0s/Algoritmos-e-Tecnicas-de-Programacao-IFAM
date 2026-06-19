@@ -76,9 +76,9 @@ void imprimirRelatorio(void) {
 
     printf("\n\t\t=== RELATORIO DE ESTOQUE ===\n");
     printf("\n----------------------------------------------------------\n");
-    printf("\nID \t Nome \t\t\t\ Qtd \t Preco \t Total\n");
+    printf("\n%-5s %-25s %-8s %-10s %-10s\n", "ID", "NOME", "QTD", "PRECO", "TOTAL");
     while (fscanf(fp, "%d;%49[^;];%d;%f;%f\n", &produto.id, produto.nome, &produto.quantidade, &produto.preco) == 4) {
-        printf("%d \t %s \t\t\t %d \t %.2f \t %.2f\n",
+        printf("%-5d %-25s %-8d %-10.2f %-10.2f\n",
                produto.id,
                produto.nome,
                produto.quantidade,
