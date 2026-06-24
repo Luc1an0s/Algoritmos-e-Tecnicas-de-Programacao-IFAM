@@ -13,8 +13,8 @@ int main() {
     if (vetor == NULL) {
         printf("Erro: Memória insuficiente!\n");
         return 1; 
-
     }
+    
     for(i = 0; i < n; i++) {
         vetor[i] = (i + 1) * 10;
         printf("vetor[%d] = %d\n", i, vetor[i]);
